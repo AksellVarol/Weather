@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>آب‌وهوا</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0f172a;color:#f1f5f9;font-family:tahoma,sans-serif;padding:14px 12px 90px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#38bdf8,#6366f1);display:flex;align-items:center;justify-content:center;font-size:26px}
+h1{font-size:20px;margin:0}
+.sub{color:#94a3b8;font-size:12px}
+.search{display:flex;gap:8px;margin:12px 0}
+.search input{flex:1;background:#1e293b;border:1px solid #334155;border-radius:12px;color:#fff;padding:11px 12px;font-family:inherit}
+.search button,.chipbtn{background:#38bdf8;border:0;border-radius:12px;color:#082f49;padding:11px 14px;font-family:inherit;font-weight:bold}
+.results{background:#1e293b;border-radius:14px;overflow:hidden;margin-bottom:12px}
+.res{padding:11px 12px;border-bottom:1px solid #334155;cursor:pointer}
+.res:last-child{border:0}
+.res b{display:block}
+.res span{color:#94a3b8;font-size:12px}
+.city{background:linear-gradient(160deg,#1e293b,#0f172a);border:1px solid #334155;border-radius:18px;padding:14px;margin-bottom:14px}
+.cityhead{display:flex;justify-content:space-between;align-items:flex-start}
+.cityname{font-size:18px;font-weight:bold}
+.citysub{color:#94a3b8;font-size:12px}
+.cur{display:flex;align-items:center;gap:14px;margin:10px 0}
+.bigicon{font-size:56px;line-height:1}
+.bigtemp{font-size:44px;font-weight:bold}
+.cond{font-size:14px;color:#cbd5e1}
+.meta{display:flex;gap:14px;color:#94a3b8;font-size:12px;flex-wrap:wrap}
+.days{margin-top:12px;border-top:1px solid #334155;padding-top:8px}
+.day{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #1e293b;font-size:13px}
+.day:last-child{border:0}
+.day .dname{flex:1}
+.day .dicon{font-size:20px;width:28px;text-align:center}
+.day .drain{color:#7dd3fc;width:52px;text-align:left;font-size:12px}
+.day .dtemp{width:86px;text-align:left;direction:ltr}
+.del{background:transparent;border:0;color:#f87171;font-size:18px;cursor:pointer}
+.widgetbox{background:#1e293b;border:1px dashed #475569;border-radius:16px;padding:12px;margin-bottom:14px}
+.widgetbox label{font-size:13px;color:#cbd5e1}
+.wrow{display:flex;justify-content:space-between;padding:7px 0;font-size:14px;border-bottom:1px solid #334155}
+.wrow:last-child{border:0}
+.note{color:#94a3b8;font-size:12px;line-height:1.9}
+.err{color:#fca5a5;font-size:13px;margin:8px 0}
+.fab{position:fixed;left:16px;bottom:16px;width:56px;height:56px;border-radius:50%;background:#38bdf8;color:#082f49;font-size:26px;border:0;box-shadow:0 8px 24px rgba(56,189,248,.4)}
+</style>
+</head>
+<body>
+<header>
+<div class="logo" style="padding:0;overflow:hidden"><img src="weather-icon.png" alt="" style="width:44px;height:44px;object-fit:cover;display:block"></div>
+<div><h1>آب‌وهوا</h1><div class="sub" id="status">در حال دریافت…</div></div>
+</header>
+
+<div class="search">
+<input id="q" placeholder="نام شهر را بنویس… مثلاً تهران، مشهد، شیراز">
+<button onclick="searchCity()">جستجو</button>
+</div>
+<div id="results" class="results" style="display:none"></div>
+<div style="margin:0 0 12px;font-size:12px;color:#94a3b8">منطقه‌های تهران (هر کدام آب‌وهوای خودش را دارد):
+<button class="chipbtn" style="padding:6px 10px;margin:2px" onclick="addCity({name:'تجریش',admin:'استان تهران',country:'ایران',lat:35.8044,lon:51.4256})">تجریش</button>
+<button class="chipbtn" style="padding:6px 10px;margin:2px" onclick="addCity({name:'اسلامشهر',admin:'استان تهران',country:'ایران',lat:35.55222,lon:51.23504})">اسلامشهر</button>
+<button class="chipbtn" style="padding:6px 10px;margin:2px" onclick="addCity({name:'بندر گز',admin:'گلستان',country:'ایران',lat:36.77409,lon:53.94798})">بندر گز</button>
+</div>
+<div style="margin:0 0 12px;font-size:12px;color:#94a3b8">منطقه‌های کرج (هر کدام دمای خودش را دارد):
+<button class="chipbtn" style="padding:6px 10px;margin:2px" onclick="addCity({name:'کرج',admin:'البرز',country:'ایران',lat:35.83266,lon:50.99155})">کرج</button>
+<button class="chipbtn" style="padding:6px 10px;margin:2px" onclick="addCity({name:'گوهردشت',admin:'کرج، البرز',country:'ایران',lat:35.85157,lon:50.97621})">گوهردشت</button>
+<button class="chipbtn" style="padding:6px 10px;margin:2px" onclick="addCity({name:'مهرشهر',admin:'کرج، البرز',country:'ایران',lat:35.80908,lon:50.89867})">مهرشهر</button>
+<button class="chipbtn" style="padding:6px 10px;margin:2px" onclick="addCity({name:'عظیمیه',admin:'کرج، البرز',country:'ایران',lat:35.83751,lon:51.01880})">عظیمیه</button>
+<button class="chipbtn" style="padding:6px 10px;margin:2px" onclick="addCity({name:'فردیس',admin:'البرز',country:'ایران',lat:35.73167,lon:50.98916})">فردیس</button>
+<button class="chipbtn" style="padding:6px 10px;margin:2px" onclick="addCity({name:'کمالشهر',admin:'کرج، البرز',country:'ایران',lat:35.86248,lon:50.88047})">کمالشهر</button>
+</div>
+<div id="err" class="err"></div>
+
+<div class="widgetbox">
+<label>ویجت صفحه اصلی — شهرهایی که در ویجت نشان داده شوند (حداکثر ۵ شهر):</label>
+<div id="wlist"></div>
+<div class="note">بعد از انتخاب، ویجت «آب‌وهوا» را به صفحه اصلی اضافه کن و با دکمه ↻ تازه‌اش کن.</div>
+</div>
+
+<div id="cities"></div>
+<div class="note">منبع: Open-Meteo (رایگان، بدون نیاز به کلید). پیش‌بینی ۱۰ روز آینده با کدهای هواشناسی WMO؛ شکلک‌ها: ☀️ آفتابی، ⛅ نیمه‌ابری، ☁️ ابری، 🌧 باران، 🌨 برف، ⛈ رعدوبرق، 🌫 مه.</div>
+<button class="fab" onclick="loadAll()">↻</button>
+
+<script>
+const LS='weatherV1';
+const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const fmt=(n,d=0)=>fa(Number(n).toLocaleString('en-US',{maximumFractionDigits:d}));
+function iconFor(code,isDay){
+  if(code===0) return isDay===0?'🌙':'☀️';
+  if(code===1) return '🌤️';
+  if(code===2) return '⛅';
+  if(code===3) return '☁️';
+  if(code===45||code===48) return '🌫️';
+  if(code>=51&&code<=57) return '🌦️';
+  if(code>=61&&code<=67) return '🌧️';
+  if(code>=71&&code<=77) return '🌨️';
+  if(code>=80&&code<=82) return '🌧️';
+  if(code>=85&&code<=86) return '🌨️';
+  if(code>=95) return '⛈️';
+  return '🌤️';
+}
+function condFa(code){
+  const m={0:'آسمان صاف',1:'غالباً صاف',2:'نیمه‌ابری',3:'ابری',45:'مه‌آلود',48:'مه یخ‌زده',51:'نم‌نم باران سبک',53:'نم‌نم باران',55:'نم‌نم باران شدید',56:'نم‌نم باران یخ‌زده',57:'نم‌نم باران یخ‌زده شدید',61:'باران سبک',63:'باران',65:'باران شدید',66:'باران یخ‌زده سبک',67:'باران یخ‌زده شدید',71:'برف سبک',73:'برف',75:'برف شدید',77:'دانه‌های برف',80:'رگبار سبک',81:'رگبار',82:'رگبار شدید',85:'رگبار برف سبک',86:'رگبار برف شدید',95:'رعدوبرق',96:'رعدوبرق با تگرگ سبک',99:'رعدوبرق با تگرگ شدید'};
+  return m[code]||'—';
+}
+function dayName(dateStr,i){
+  const d=new Date(dateStr+'T12:00:00');
+  const names=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+  if(i===0) return 'امروز';
+  if(i===1) return 'فردا';
+  return names[d.getDay()];
+}
+function dateFa(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  return fa(d.getDate())+' '+['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','ژوئیه','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'][d.getMonth()];
+}
+let cities=JSON.parse(localStorage.getItem(LS)||'null');
+if(!cities){
+  cities=[
+    {name:'تهران',admin:'استان تهران',country:'ایران',lat:35.69439,lon:51.42151},
+    {name:'مشهد',admin:'خراسان رضوی',country:'ایران',lat:36.2972,lon:59.6067},
+    {name:'اصفهان',admin:'اصفهان',country:'ایران',lat:32.65246,lon:51.67462},
+    {name:'شیراز',admin:'فارس',country:'ایران',lat:29.6103,lon:52.5311}
+  ];
+  localStorage.setItem(LS,JSON.stringify(cities));
+}
+let widgetCities=JSON.parse(localStorage.getItem(LS+'Widget')||'null');
+if(!widgetCities) widgetCities=cities.slice(0,3).map(c=>c.name);
+
+function saveWidget(){
+  localStorage.setItem(LS+'Widget',JSON.stringify(widgetCities));
+  try{ AndroidBridge.saveWidget(widgetCities.map(n=>{const c=cities.find(x=>x.name===n);return c?c.name+'|'+c.lat+'|'+c.lon:n;}).join(',')); }catch(e){}
+  renderWidgetBox();
+}
+function renderWidgetBox(){
+  const el=document.getElementById('wlist');
+  el.innerHTML=cities.map(c=>{
+    const on=widgetCities.includes(c.name);
+    return '<div class="wrow"><span>'+c.name+'</span><input type="checkbox" '+(on?'checked':'')+' onchange="toggleWidget(\''+c.name.replace(/'/g,'')+'\',this.checked)"></div>';
+  }).join('');
+}
+function toggleWidget(name,on){
+  if(on){ if(widgetCities.length>=5){alert('حداکثر ۵ شهر در ویجت');renderWidgetBox();return;} widgetCities.push(name); }
+  else widgetCities=widgetCities.filter(x=>x!==name);
+  saveWidget();
+}
+async function fetchJSON(url){
+  const tries=[url,'https://api.allorigins.win/raw?url='+encodeURIComponent(url),'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(url)];
+  let lastErr=null;
+  for(const u of tries){
+    try{ const r=await fetch(u); if(!r.ok) throw new Error(r.status); return await r.json(); }catch(e){ lastErr=e; }
+  }
+  throw lastErr;
+}
+async function searchCity(){
+  const q=document.getElementById('q').value.trim();
+  if(!q) return;
+  document.getElementById('err').textContent='';
+  try{
+    // Try several spellings of the same place, because Open-Meteo's database
+    // often stores Persian names with Arabic letters (ي/ك) instead of Persian (ی/ک),
+    // and sometimes with a space ("بندر گز") instead of joined ("بندرگز").
+    // Example: "تجریش" (Persian ی) gives nothing, "تجريش" (Arabic ي) finds Tajrish.
+    // Districts are separate entries with their own coordinates, so Tajrish
+    // (35.8044, 51.4256) and Islamshahr (35.5522, 51.2350) really do differ.
+    const norm=s=>s.replace(/ی/g,'ي').replace(/ک/g,'ك');
+    const variants=[];
+    const push=v=>{ if(v&&!variants.includes(v)) variants.push(v); };
+    push(q); push(norm(q)); push(q.replace(/\s+/g,'')); push(norm(q).replace(/\s+/g,''));
+    for(const base of [q,norm(q)]){
+      for(let i=2;i<base.length-1;i++) push(base.slice(0,i)+' '+base.slice(i));
+    }
+    let data={results:[]};
+    for(const v of variants){
+      try{
+        const d=await fetchJSON('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(v)+'&count=10&language=fa&format=json');
+        if(d.results&&d.results.length){ data=d; break; }
+      }catch(e){}
+    }
+    // Second source: OpenStreetMap/Nominatim finds districts Open-Meteo misses
+    // (e.g. Mehrshahr, Azimiyeh in Karaj). Merge them, deduplicated by coordinates.
+    try{
+      const nom=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(q)+'&format=json&limit=8&accept-language=fa').then(r=>r.json());
+      for(const n of nom||[]){
+        const lat=parseFloat(n.lat), lon=parseFloat(n.lon);
+        if(data.results.some(r=>Math.abs(r.latitude-lat)<0.01&&Math.abs(r.longitude-lon)<0.01)) continue;
+        const parts=(n.display_name||'').split(',').map(s=>s.trim()).filter(Boolean);
+        data.results.push({name:parts[0]||q, admin:parts.slice(1,4).join('، '), country:parts.includes('ایران')?'ایران':'', latitude:lat, longitude:lon});
+      }
+    }catch(e){}
+    const box=document.getElementById('results');
+    if(!data.results||!data.results.length){ box.style.display='none'; document.getElementById('err').textContent='شهری با این نام پیدا نشد. نام را با فاصله بنویس، مثلاً «بندر گز»، یا نام کامل‌تری بنویس.'; return; }
+    box.style.display='block';
+    box.innerHTML=data.results.map(r=>'<div class="res" onclick=\'addCity('+JSON.stringify({name:r.name,admin:r.admin1||'',country:r.country||'',lat:r.latitude,lon:r.longitude}).replace(/'/g,'')+')\'><b>'+r.name+'</b><span>'+(r.admin1||'')+'، '+(r.country||'')+'</span></div>').join('');
+  }catch(e){ document.getElementById('err').textContent='خطا در جستجو؛ اینترنت را بررسی کن و دوباره بزن.'; }
+}
+function addCity(c){
+  if(cities.find(x=>Math.abs(x.lat-c.lat)<0.01&&Math.abs(x.lon-c.lon)<0.01)){ document.getElementById('results').style.display='none'; return; }
+  cities.push(c); localStorage.setItem(LS,JSON.stringify(cities));
+  document.getElementById('results').style.display='none'; document.getElementById('q').value='';
+  renderWidgetBox(); loadAll();
+}
+function removeCity(name){
+  cities=cities.filter(c=>c.name!==name); widgetCities=widgetCities.filter(n=>n!==name);
+  localStorage.setItem(LS,JSON.stringify(cities)); saveWidget(); loadAll();
+}
+async function loadAll(){
+  document.getElementById('status').textContent='در حال دریافت…';
+  const box=document.getElementById('cities'); box.innerHTML='';
+  let ok=0;
+  for(const c of cities){
+    try{
+      const data=await fetchJSON('https://api.open-meteo.com/v1/forecast?latitude='+c.lat+'&longitude='+c.lon+'&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=10&timezone=auto');
+      ok++;
+      const cur=data.current_weather;
+      const d=data.daily;
+      const days=d.time.map((t,i)=>'<div class="day"><span class="dname">'+dayName(t,i)+' <span style="color:#94a3b8">'+dateFa(t)+'</span></span><span class="dicon">'+iconFor(d.weathercode[i],1)+'</span><span class="drain">'+(d.precipitation_probability_max[i]!=null?'💧 '+fa(d.precipitation_probability_max[i])+'٪':'')+'</span><span class="dtemp">'+fa(Math.round(d.temperature_2m_min[i]))+'° / '+fa(Math.round(d.temperature_2m_max[i]))+'°</span></div>').join('');
+      const card=document.createElement('div'); card.className='city';
+      card.innerHTML='<div class="cityhead"><div><div class="cityname">'+c.name+'</div><div class="citysub">'+(c.admin?c.admin+'، ':'')+c.country+'</div></div><button class="del" onclick="removeCity(\''+c.name.replace(/'/g,'')+'\')">×</button></div>'
+        +'<div class="cur"><div class="bigicon">'+iconFor(cur.weathercode,cur.is_day)+'</div><div><div class="bigtemp">'+fa(Math.round(cur.temperature))+'°</div><div class="cond">'+condFa(cur.weathercode)+'</div></div></div>'
+        +'<div class="meta"><span>🌡️ بیشینه امروز: '+fa(Math.round(d.temperature_2m_max[0]))+'°</span><span>کمینه: '+fa(Math.round(d.temperature_2m_min[0]))+'°</span><span>💨 باد: '+fa(Math.round(cur.windspeed))+' کیلومتر بر ساعت</span><span>🕐 '+cur.time.slice(11,16)+'</span></div>'
+        +'<div class="days">'+days+'</div>';
+      box.appendChild(card);
+    }catch(e){
+      const card=document.createElement('div'); card.className='city';
+      card.innerHTML='<div class="cityhead"><div><div class="cityname">'+c.name+'</div></div><button class="del" onclick="removeCity(\''+c.name.replace(/'/g,'')+'\')">×</button></div><div class="err">دریافت آب‌وهوا ناموفق بود؛ دوباره ↻ را بزن.</div>';
+      box.appendChild(card);
+    }
+  }
+  document.getElementById('status').textContent=ok?('به‌روز شد — '+fa(ok)+' شهر'):'دریافت ناموفق بود';
+}
+renderWidgetBox();
+loadAll();
+setInterval(loadAll,600000);
+</script>
+</body>
+</html>
